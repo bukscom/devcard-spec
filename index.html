@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>devcard.md — The Developer Identity Standard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --border: #222222;
+    --accent: #00ff88;
+    --accent2: #ff3cac;
+    --accent3: #7b2fff;
+    --text: #f0f0f0;
+    --muted: #666;
+    --card-bg: #141414;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.15s ease;
+    mix-blend-mode: difference;
+    opacity: 0.5;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.3;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(123,47,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.2);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 40px;
+    letter-spacing: 0.1em;
+    width: fit-content;
+    animation: fadeDown 0.6s ease forwards;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero-title {
+    font-size: clamp(64px, 10vw, 140px);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+
+  .hero-title .file {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    display: block;
+  }
+
+  .hero-title .sub {
+    color: var(--muted);
+    font-size: 0.45em;
+    font-weight: 400;
+    display: block;
+    margin-top: 8px;
+    letter-spacing: 0.02em;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .hero-desc {
+    font-size: 20px;
+    color: #999;
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+
+  .hero-desc strong {
+    color: var(--text);
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.7s ease 0.3s both;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 2px;
+    cursor: none;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  .btn-primary:hover { background: #00cc6a; transform: translateY(-2px); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 14px 28px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: none;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 60px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeUp 1s ease 0.8s both;
+  }
+  .scroll-hint::before {
+    content: '';
+    width: 40px; height: 1px;
+    background: var(--muted);
+  }
+
+  /* Problem section */
+  .section {
+    padding: 120px 60px;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-size: clamp(36px, 5vw, 72px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  /* Problem list */
+  .problem-list {
+    list-style: none;
+    margin: 48px 0;
+  }
+
+  .problem-list li {
+    font-size: clamp(20px, 2.5vw, 32px);
+    color: #555;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: color 0.3s;
+  }
+
+  .problem-list li:hover { color: var(--text); }
+
+  .problem-list li span {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent2);
+    background: rgba(255,60,172,0.1);
+    padding: 4px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  /* How it works */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2px;
+    margin-top: 64px;
+  }
+
+  .step {
+    background: var(--card-bg);
+    padding: 40px 32px;
+    border: 1px solid var(--border);
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .step:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+  }
+
+  .step-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+
+  .step h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .step p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Devcard preview */
+  .devcard-preview {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    max-width: 680px;
+    margin: 64px auto 0;
+    position: relative;
+  }
+
+  .devcard-preview::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3), var(--accent2));
+  }
+
+  .devcard-topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: #0d0d0d;
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+
+  .devcard-filename {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 8px;
+  }
+
+  .devcard-body {
+    padding: 32px 36px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 2;
+  }
+
+  .md-h1 { color: var(--text); font-size: 16px; font-weight: 700; }
+  .md-h2 { color: var(--accent); margin-top: 20px; font-size: 13px; }
+  .md-li { color: #aaa; padding-left: 4px; }
+  .md-li .key { color: #ddd; }
+  .md-li .val { color: var(--accent2); }
+  .md-comment { color: #444; font-style: italic; }
+
+  /* The big quote */
+  .quote-section {
+    padding: 120px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .quote-section::before {
+    content: '"';
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 400px;
+    color: rgba(0,255,136,0.03);
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .big-quote {
+    font-size: clamp(28px, 4vw, 56px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    margin: 0 auto 32px;
+  }
+
+  .big-quote .highlight {
+    color: var(--accent);
+    position: relative;
+  }
+
+  .quote-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* Schema section */
+  .schema-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2px;
+    margin-top: 64px;
+  }
+
+  .schema-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 32px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .schema-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .schema-item:hover::after { transform: scaleX(1); }
+  .schema-item:hover { border-color: rgba(0,255,136,0.2); }
+
+  .schema-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .schema-item h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .schema-item p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 120px 60px;
+    text-align: center;
+    position: relative;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,255,136,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .cta-title {
+    font-size: clamp(40px, 6vw, 88px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+  }
+
+  .cta-title .green { color: var(--accent); }
+
+  .cta-sub {
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 48px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-logo {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0 60px;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero, .section, .quote-section, .cta-section { padding: 60px 24px; }
+    footer { padding: 32px 24px; }
+    .divider { margin: 0 24px; }
+    .steps { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">OPEN STANDARD — v0.1 PROPOSAL</div>
+  <h1 class="hero-title">
+    <span class="file">devcard.md</span>
+    <span class="sub">The Developer Identity Standard for the AI Era</span>
+  </h1>
+  <p class="hero-desc">
+    One markdown file. Lives in your GitHub. Travels with you everywhere.<br>
+    <strong>AI tools finally know who you are — from day one.</strong>
+  </p>
+  <div class="hero-actions">
+    <a href="#spec" class="btn-primary">READ THE SPEC →</a>
+    <a href="#devcard" class="btn-outline">SEE AN EXAMPLE</a>
+  </div>
+  <div class="scroll-hint">SCROLL TO EXPLORE</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROBLEM -->
+<section class="section">
+  <div class="section-label">// THE PROBLEM</div>
+  <h2 class="section-title">You re-explain yourself<br>every single time.</h2>
+
+  <ul class="problem-list">
+    <li><span>TOOL #1</span> "What's your stack?" — you type it again.</li>
+    <li><span>TOOL #2</span> "How do you like your code?" — you type it again.</li>
+    <li><span>TOOL #3</span> "What should I call you?" — you type it again.</li>
+    <li><span>TOOL #4</span> The AI calls you "user" when your name is Z.</li>
+  </ul>
+
+  <p style="color: var(--muted); font-size: 18px; max-width: 560px; line-height: 1.7;">
+    There are standards for project context. Standards for team context.
+    <strong style="color: var(--text);">Nothing for you — the human behind the keyboard.</strong>
+    <br><br>Until now.
+  </p>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="section-label">// HOW IT WORKS</div>
+  <h2 class="section-title">Dead simple.<br>By design.</h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01 —</div>
+      <h3>Create your devcard.md</h3>
+      <p>Write your identity, vibe, stack, and AI preferences once. Takes 5 minutes.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02 —</div>
+      <h3>Push to GitHub</h3>
+      <p>Drop it in a public Gist or a dedicated repo. One raw URL is all you need.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03 —</div>
+      <h3>Any tool reads it</h3>
+      <p>AI tools fetch it at session start. No SDK. No API. Just markdown over HTTP.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04 —</div>
+      <h3>You're known everywhere</h3>
+      <p>Every tool knows your name, style, preferences. You never onboard yourself again.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DEVCARD PREVIEW -->
+<section class="section" id="devcard">
+  <div class="section-label">// EXAMPLE</div>
+  <h2 class="section-title">What yours<br>could look like.</h2>
+
+  <div class="devcard-preview">
+    <div class="devcard-topbar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="devcard-filename">devcard.md</span>
+    </div>
+    <div class="devcard-body">
+      <div class="md-h1"># devcard.md</div>
+      <br>
+      <div class="md-h2">## Identity</div>
+      <div class="md-li">- <span class="key">Name:</span> <span class="val">Z</span></div>
+      <div class="md-li">- <span class="key">Call me:</span> <span class="val">Z</span></div>
+      <div class="md-li">- <span class="key">Role:</span> <span class="val">Developer & Builder of Things That Matter</span></div>
+      <br>
+      <div class="md-h2">## My Vibe</div>
+      <div class="md-li">- <span class="key">Style:</span> <span class="val">Move fast, think big, fix it when it breaks</span></div>
+      <div class="md-li">- <span class="key">Strength:</span> <span class="val">Connecting dots nobody else sees</span></div>
+      <div class="md-li">- <span class="key">Weakness:</span> <span class="val">Documentation? What documentation?</span></div>
+      <br>
+      <div class="md-h2">## AI Preferences</div>
+      <div class="md-li">- <span class="key">Tone:</span> <span class="val">Peer, not professor. Teammate, not stranger.</span></div>
+      <div class="md-li">- <span class="key">Response:</span> <span class="val">Lead with the answer. Details after.</span></div>
+      <br>
+      <div class="md-h2">## Currently Working On</div>
+      <div class="md-li">- <span class="val">devcard.md — an open standard so AI tools</span></div>
+      <div class="md-li">&nbsp;&nbsp;<span class="val">know who they're working with from day one</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SCHEMA -->
+<section class="section" id="spec">
+  <div class="section-label">// THE SCHEMA</div>
+  <h2 class="section-title">Six sections.<br>Infinite identity.</h2>
+
+  <div class="schema-grid">
+    <div class="schema-item">
+      <div class="schema-icon">🪪</div>
+      <h3>## Identity</h3>
+      <p>Your name, what to call you, your role, GitHub handle. The basics — but powerful.</p>
+    </div>
+    <div class="schema-item">
+      <div class="schema-icon">⚡</div>
+      <h3>## My Stack</h3>
+      <p>Languages, frameworks, databases, tools. What you actually build with.</p>
+    </div>
+    <div class="schema-item">
+      <div class="schema-icon">🎯</div>
+      <h3>## My Vibe</h3>
+      <p>Working style, strengths, weaknesses, likes, don'ts. Your personality in code form.</p>
+    </div>
+    <div class="schema-item">
+      <div class="schema-icon">✍️</div>
+      <h3>## Code Style</h3>
+      <p>Indentation, naming, commits, PRs. How you write code — consistently.</p>
+    </div>
+    <div class="schema-item">
+      <div class="schema-icon">🤖</div>
+      <h3>## AI Preferences</h3>
+      <p>Tone, length, behavior when stuck. How every AI tool should talk to you.</p>
+    </div>
+    <div class="schema-item">
+      <div class="schema-icon">🚀</div>
+      <h3>## Currently Working On</h3>
+      <p>Your current focus. Gives every tool instant project context without extra words.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUOTE -->
+<section class="quote-section">
+  <p class="big-quote">
+    Every developer has a vibe.<br>
+    Every developer has a name.<br>
+    AI tools should know that<br>
+    <span class="highlight">from day one — not day never.</span>
+  </p>
+  <p class="quote-sub">— devcard.md open standard, v0.1</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="cta-title">
+    Write it once.<br>
+    Work with <span class="green">every tool.</span><br>
+    Be known everywhere.
+  </h2>
+  <p class="cta-sub">// open standard — MIT license — community owned</p>
+  <div class="hero-actions" style="justify-content: center; margin-top: 48px;">
+    <a href="#spec" class="btn-primary">CREATE YOUR DEVCARD →</a>
+    <a href="#spec" class="btn-outline">CONTRIBUTE TO SPEC</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">devcard.md</span>
+  <span>Open Standard v0.1 — Proposed by Z</span>
+  <span>MIT License — Community Owned</span>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursor.style.left = mouseX - 6 + 'px';
+    cursor.style.top = mouseY - 6 + 'px';
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX - 18) * 0.12;
+    ringY += (mouseY - ringY - 18) * 0.12;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Hover effect on interactive elements
+  document.querySelectorAll('a, button, .step, .schema-item').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'scale(2)';
+      ring.style.transform = 'scale(1.5)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'scale(1)';
+      ring.style.transform = 'scale(1)';
+    });
+  });
+
+  // Fade in on scroll
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.step, .schema-item, .section-title, .section-label').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
