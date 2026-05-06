@@ -530,11 +530,36 @@
   }
 
   /* Responsive */
+  @media (max-width: 1024px) {
+    .hero, .section, .quote-section, .cta-section { padding: 80px 36px; }
+    .scroll-hint { left: 36px; }
+    .divider { margin: 0 36px; }
+    .problem-list li { flex-wrap: wrap; }
+  }
+
   @media (max-width: 768px) {
     .hero, .section, .quote-section, .cta-section { padding: 60px 24px; }
     footer { padding: 32px 24px; }
     .divider { margin: 0 24px; }
     .steps { grid-template-columns: 1fr; }
+    .scroll-hint { left: 24px; bottom: 24px; }
+    .problem-list li { font-size: clamp(18px, 6vw, 24px); }
+    .devcard-body { padding: 24px 20px; line-height: 1.75; }
+    .hero-actions { width: 100%; }
+    .hero-actions a { flex: 1 1 220px; text-align: center; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-title { line-height: 0.95; }
+    .hero-desc, .cta-sub { font-size: 16px; }
+    .problem-list li span { width: 100%; }
+    .schema-item, .step { padding: 24px 20px; }
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+    .btn-primary, .btn-outline { cursor: pointer; }
   }
 </style>
 </head>
